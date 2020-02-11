@@ -1,0 +1,156 @@
+---
+title: 'Class 6: R Functions'
+author: "Larissa Rapadas"
+date: "1/23/2020"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#this is a silly plot
+plot (1:5, col= "purple", typ="o")
+```
+
+Let's see more about **file import** (i.e. reading files into R). The main read function in base R is `read.table()`
+
+```{r}
+read.csv("test1.txt") #by default has comma-separated values and headers
+read.csv("test2.txt", sep="$") #has headers but is separated by "$"
+read.table("test3.txt") #by default has space-separated values and NO headers
+```
+
+# Functions
+Our first example function:
+```{r}
+add <- function(x, y=1) {
+  #Sum the input of x and y
+  x + y
+}
+```
+
+Let's try using this function
+```{r}
+add(1)
+add(7,3)
+```
+
+Let's see how this works with vectors as input:
+```{r}
+add(c(1,2,3)) #adds 1 to each element to vector c
+add(c(1,2,3), 4) #adds 4 to each element to vector c
+add(c(1,2,3), c(1,2,3)) #adds each element to the corresponding vector elements
+```
+
+What is this `range()` function you speak of?
+```{r}
+x <- c(4,4,10,3,11)
+max(x)
+min(x)
+```
+```{r}
+range(x)
+```
+
+# This is our second function:
+You need a “name”, “arguments” and “body”…
+```{r}
+rescale <- function(x) {
+ rng <-range(x)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+## Test on a small example where you know the answer
+```{r}
+rescale(1:10)
+```
+
+## How would you get your function to work here…
+```{r}
+rescale(c(1,2,NA,3,10))
+```
+Because we haven't set our function to omit NA's, we must argue with the function to do so
+```{r}
+rescale2 <- function(x) {
+ rng <-range(x, na.rm=TRUE)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+rescale2(x)
+```
+Now that we have done so, our previous function call should now work, omitting our NA input
+```{r}
+x <- rescale2(c(1,2,NA,3,10))
+```
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ rng <-range(x, na.rm=na.rm)
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ return(answer)
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+ return(answer)
+}
+```
+```{r}
+rescale3(x)
+```
+#Hands-on Section B
+
+```{r}
+# Can you improve this analysis code?
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+**Q1.** What type of object is returned from the `read.pdb()` function?
+- Returns a large list of 8 things and of class "pdb" and "sse"
+```{r}
+class(s1)
+str(s1)
+```
+**Q2.** What does the trim.pdb() function do?
+- Trims the previously read pdb file. Creates a new PDB object based on a subset of atoms
+
+**Q3.** What input parameter would turn off the marginal black and grey rectangles in the plots and what do they represent in this case?
+- 
+**Q4.** What would be a better plot to compare across the different proteins?
+- Combine the three separate plots into one for easier comparison of lines
+```{r}
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+points(s2.b, typ="l", col="blue", lwd=1)
+points(s3.b, typ="l", col="red", lwd=1) 
+```
+
+**Q5.** Which proteins are more similar to each other in their B-factor trends. How could you quantify this?
+- With a cluster dendrogram. This quantifies the distance between the the rows of the three different vectors below.
+```{r}
+hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+
+**Q6.** How would you generalize the original code above to work with any set of input protein structures?
+c(read.pdb("4AKE"),)

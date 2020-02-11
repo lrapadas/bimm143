@@ -1,0 +1,50 @@
+---
+title: "HW_Q6: Creating R Functions"
+author: "Larissa Rapadas"
+date: "1/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Improving analysis code by writing functions
+
+The function `prot_analysis ()` below takes any PDB protein structure and prints a plot of the protein's B-factor over the length of its residues.
+
+```{r}
+# First, we have to load the bio3d package into our workspace
+# The pdb functions will not work without it
+library (bio3d)
+
+prot_analysis <- function (pdb) { # This takes any PDB acc. # in "_"
+ 
+  # Read the PDB file
+  protein <- read.pdb (pdb)
+  
+  # Trim PBD to only atoms of chain A and C-alpha
+  chainA <- trim.pdb (protein, chain="A", elety="CA")
+  
+  # Select the B-factor data from the chainA subset above
+  protein.b <- chainA$atom$b
+  
+  # Plot the B-factor data along the residues of the protein input
+  # Will also denote the corresponding secondary structure along the margin
+  plotb3 (protein.b, sse=chainA, typ="l", ylab="B-factor") 
+}
+```
+
+Now, we can call this function for any protein of our choosing,
+as long as it has a PDB accessible file.
+
+Let's try calling `prot_analysis ()` on the one of the kinases we tried in class.
+```{r}
+prot_analysis ("4AKE")
+```
+
+When called correctly, the function should output a plot of the protein's B-factor 
+over the length of its residues. There should also be marginal rectangles corresponding 
+to the protein's secondary structure at that specific residue: gray = sheets, black = helices.
+
+                                                      -- END --

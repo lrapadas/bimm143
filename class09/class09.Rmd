@@ -1,0 +1,188 @@
+---
+title: "class09"
+author: "Larissa Rapadas"
+date: "2/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Introduction to Machine Learning for Bioinformatics
+
+### K-Means Clustering
+```{r}
+# Generate some example data for clustering
+tmp <- c(rnorm(30,-3), rnorm(30,3))
+x <- cbind(x=tmp, y=rev(tmp))
+plot(x)
+```
+
+Use the kmeans() function setting k to 2 and nstart=20
+```{r}
+km <- kmeans (x, centers=2, nstart=20)
+```
+
+#### Inspect/print the results
+
+**Q. How many points are in each cluster?**
+*There are 30 points in each cluster*
+
+**Q. What ‘component’ of your result object details**
+ 
+ **- cluster size?** 
+ *size*
+
+ **- cluster assignment/membership?**
+ *cluster*
+ 
+ **- cluster center?**
+ *centers*
+
+#### Plot x colored by the kmeans cluster assignment and
+ Add cluster centers as blue points
+```{r}
+ plot(x, col = km$cluster+65)
+points(km$centers, col = "blue", pch=15)
+```
+
+### Hierarchical Clustering
+• Number of clusters is not known ahead of time
+
+• Two kinds of hierarchical clustering:
+
+➡ bottom-up
+  
+➡ top-down 
+
+An important point here is that you ave to calculate the distance from your input data before calling `hclust()`.
+```{r}
+# First we need to calculate point (dis)similarity
+# as the Euclidean distance between observations
+dist <- dist(x)
+
+# The hclust() function returns a hierarchical
+# clustering model
+
+hc <- hclust(d = dist)
+# the print method is not so useful here
+hc
+```
+Plotting this data is much more useful:
+```{r}
+plot(hc)
+```
+
+This outputs a **cluster dendrogram**:
+A dendrogram is a tree-shaped structure used to interpret hierarchical clustering models
+
+```{r}
+plot(hc)
+abline(h=6, col="red", lty=2)
+abline(h=3.5, col="blue", lty=2)
+```
+To get the cluster membership vector, I need to "cut the tree" at a certain height to yield my separate cluster branches
+```{r}
+cutree(hc, h=6) # Cut by height h
+```
+```{r}
+gp4 <- cutree(hc, h=4)
+table (gp4)
+```
+We can also cut the tree according to k groups, if you do not know at what height to split the clusters
+```{r}
+cutree(hc, k=2 ) # Cut into k grps
+```
+
+We can try different linkage methods for organizing the clusters in R
+```{r}
+# Using different hierarchical clustering methods
+hc.complete <- hclust(dist, method="complete")
+plot(hc.complete)
+
+hc.average <- hclust(dist, method="average")
+plot(hc.average)
+
+hc.single <- hclust(dist, method="single")
+plot(hc.single)
+```
+
+```{r}
+# Step 1. Generate some example data for clustering
+x <- rbind(
+ matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2), # c1
+ matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2
+ matrix(c(rnorm(50, mean = 1, sd = 0.3), # c3
+ rnorm(50, mean = 0, sd = 0.3)), ncol = 2))
+colnames(x) <- c("x", "y")
+# Step 2. Plot the data without clustering
+plot(x)
+# Step 3. Generate colors for known clusters
+# (just so we can compare to hclust results)
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+```
+
+```{r}
+length(x)
+```
+
+**Q. Use the dist(), hclust(), plot() and cutree() functions to return 2 and 3 clusters**
+```{r}
+d <- dist(x)
+hc2 <- hclust(d) 
+plot(hc2)
+```
+```{r}
+plot(hc2)
+abline(h=6, col="red", lty=2)
+cutree(hc2, k=2)
+abline(h=6, col="red", lty=2)
+grps <- cutree(hc2, k=3)
+table (grps)
+```
+
+**Q. How does this compare to your known 'col' groups?**
+```{r}
+plot(x, col=grps)
+```
+## Principal Component Analysis (PCA)
+
+PCA converts the correlations (or lack thereof) among all cells into a representation we can more readily interpret (e.g. a 2D graph!)
+
+The PCs (i.e. new plot axis) are ranked by their importance. So PC1 is more important than PC2 which in turn is more important than PC3, etc.
+
+The PCs (i.e. new plot axis) are ranked by the amount of variance in the original data (i.e. gene expression values) that they “capture” 
+
+## Hands-on with PCA
+```{r}
+x <- read.csv("UK_foods.csv", row.names = 1)
+x
+dim(x) # this prints out a vector of rows columns
+```
+# Spotting major differences and trends
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+```{r}
+# Use the prcomp() PCA function 
+pca <- prcomp( t(x) )
+summary(pca)
+```
+What's in my result object `pca`? I can check the attributes:
+```{r}
+attributes(pca)
+```
+Plot PC1 vs PC2
+```{r}
+plot (pca$x[,1], pca$x[,2], 
+      xlab="PC1", ylab="PC2", # Label the axes
+      xlim=c(-270,500)) # Range in x
+
+# Label the plot points to find out what countries represent which data points
+text(pca$x[,1], pca$x[,2], colnames(x), col=c("grey","red","blue","darkgreen"))
+```
+ Now we want to find out what makes N. Ireland so different from the other three countries
