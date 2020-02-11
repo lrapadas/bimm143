@@ -1,0 +1,10 @@
+---
+title: "class11"
+author: "Larissa Rapadas"
+date: "2/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
