@@ -30,8 +30,9 @@ round(ans, 2)
 proteins <- sum(stats$Proteins)/sum(stats$Total) * 100
 round(proteins, 2)
 ```
-**-- Aim to have a rendered GitHub document with working code that yields your answers.**
+***-- Aim to have a rendered GitHub document with working code that yields your answers.***
 
 **Q2: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB.**
+
 -- There are currently 1289 protease structures in the current PDB.
 
