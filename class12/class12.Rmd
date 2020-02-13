@@ -36,3 +36,34 @@ round(proteins, 2)
 
 -- There are currently 1289 protease structures in the current PDB.
 
+## Hands-on Part II
+
+```{r}
+library (bio3d)
+
+pdb <- read.pdb("1hsg")
+pdb
+```
+
+We want to select on protein atoms
+
+We will use `atom.select()` to do this
+
+```{r}
+attributes(pdb)
+```
+```{r}
+pdb$atom
+
+prot <- atom.select (pdb, "protein", value = TRUE)
+lig <- atom.select (pdb, "ligand", value = TRUE)
+```
+
+And we write these new PBD objects with the `write.pdb()` function
+
+```{r}
+write.pdb(prot)
+write.pdb(lig)
+```
+
+
