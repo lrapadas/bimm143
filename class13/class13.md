@@ -70,3 +70,8 @@ Select ligand only
 ``` r
 write.pdb (lig, file="1hsg_ligand.pdb")
 ```
+
+``` r
+res <- read.pdb("all.pdbqt", multi=TRUE)
+write.pdb(res, "results.pdb")
+```
