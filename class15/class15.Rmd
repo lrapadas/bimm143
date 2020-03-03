@@ -1,0 +1,144 @@
+---
+title: "Class 15: Transcriptomics and the Analysis of RNA-Seq Data"
+author: "Larissa Rapadas"
+date: "2/20/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Import today's data:
+```{r}
+counts <- read.csv("data/airway_scaledcounts.csv", stringsAsFactors = FALSE)
+metadata <-  read.csv("data/airway_metadata.csv", stringsAsFactors = FALSE)
+```
+
+The data for this hands-on session comes from a published RNA-seq experiment where airway smooth muscle cells were treated with dexamethasone, a synthetic glucocorticoid steroid with anti-inflammatory effects (Himes et al. 2014).
+
+Glucocorticoids are used, for example, by people with asthma to reduce inflammation of the airways. The anti-inflammatory effects on airway smooth muscle (ASM) cells has been known for some time but the underlying molecular mechanisms are unclear.
+
+```{r}
+control <- metadata[metadata[,"dex"]=="control",]
+
+control.mean <- rowSums( counts[ ,control$id] )/nrow(control) 
+
+names(control.mean) <- counts$ensgene
+control.mean
+```
+
+### Questions:
+
+***Q1. How would you make the above code more robust? What would happen if you were to add more samples. Would the values obtained with the excat code above be correct?***
+
+-- Since the code divides by 4 specifically because we on have 4 controls, the mean calculation would be wrong if we happen to add more data. We can make this code more robust by dividing by the sum of control data (nrow of control) we collect, not by a specific number.
+
+
+
+***Q2. Follow the same procedure for the treated samples (i.e. calculate the mean per gene accross drug treated samples and assign to a labeled vector called treated.mean)***
+
+```{r}
+treated <- metadata[metadata[,"dex"]=="treated",]
+
+treated.mean <- rowSums( counts[ ,treated$id] )/nrow(treated) 
+
+names(treated.mean) <- counts$ensgene
+treated.mean
+```
+```{r}
+meancounts <- data.frame(control.mean, treated.mean)
+meancounts
+```
+```{r}
+plot (meancounts, xlab = "Control", ylab="Treated", log="xy")
+```
+
+```{r}
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+meancounts
+```
+
+Remove any gene that has zero values in the mean counts
+```{r}
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts)
+mycounts
+```
+
+**Q5. Using the up.ind and down.ind vectors above can you determine how many up and down regulated genes we have at the greater than 2 fc level?**
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+sum(up.ind)
+sum(down.ind)
+```
+
+## Do this properly with DESeq2
+
+Setup input for DESeq by specifying countdata, metadata and the experiment design (which comparisons we are interested in)
+
+```{r}
+library(DESeq2)
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+```
+```{r}
+dds <- DESeq(dds)
+```
+```{r}
+res <- results(dds)
+res$sig <- res$padj<0.05 & abs(res$log2FoldChange)>2
+
+# How many of each?
+table(res$sig)
+```
+
+## Volcano Plots
+```{r}
+plot(res$log2FoldChange,res$padj)
+```
+```{r}
+#Change the color palette for the plot
+palette ( c("gray", "blue"))
+
+plot(res$log2FoldChange,-log(res$padj), 
+     col=res$sig+1,
+     ylab="-Log (p-value)", xlab="Log2 (Fold Change)",
+)
+
+#Add some cut-off lines
+# Add some cut-off lines
+abline(v=c(-2,2), col="darkgray", lty=2)
+abline(h=-log(0.1), col="darkgray", lty=2)
+```
+```{r}
+# Setup our custom point color vector 
+mycols <- rep("gray", nrow(res))
+mycols[ abs(res$log2FoldChange) > 2 ]  <- "red" 
+
+inds <- (res$padj < 0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+#Volcano plot with custom colors 
+plot( res$log2FoldChange,  -log(res$padj), 
+ col=mycols, ylab="-Log(P-value)", xlab="Log2(FoldChange)" )
+
+abline(v=c(-2,2), col="gray", lty=2)
+abline(h=-log(0.1), col="gray", lty=2)
+```
+```{r}
+library(ggplot2)
+
+ggplot(as.data.frame(res), aes(log2FoldChange, -log10(pvalue), col=sig)) + 
+    geom_point() + 
+    ggtitle("Volcano plot")
+```
+
+
