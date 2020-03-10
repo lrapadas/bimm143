@@ -1,0 +1,90 @@
+---
+title: "Class 18: Investigating Cancer Genomics Datasets"
+author: "Larissa Rapadas"
+date: "3/5/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The GenomicDataCommons Packages
+
+First we install the three packages from Bioconductor: `GenomicDataCommons`, `TCGAbiolinks` and `maftools`. This is done in the console:
+```{r}
+#BiocManager::install( c("GenomicDataCommons", "TCGAbiolinks", "maftools") )
+
+```
+
+Now we have to load the newly downloaded packages into our console:
+```{r}
+library(GenomicDataCommons) # to talk to the database and download data all from R
+
+library(TCGAbiolinks)
+library(maftools)
+```
+
+Now let's check on the GDC status:
+```{r}
+status()
+```
+
+## Querying the GDC from R
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%
+  aggregations()
+head(cases_by_project)
+
+# pipe operator %>% -> organizes the sequence of functions
+```
+
+### Plot this overview data with a barplot:
+```{r}
+x <- cases_by_project$project.project_id
+```
+```{r}
+barplot(x$doc_count, names.arg= x$key, log ="y", las=2, col="lightblue")
+```
+
+## Variant Analysis with R
+
+Find files available for PAAD project that we can then examine variants from
+```{r}
+maf.file <- GDCquery_Maf(tumor="PAAD", pipelines = "mutect")
+
+```
+```{r}
+head(maf.file)
+
+```
+
+Read in the MAF file we found:
+```{r}
+vars = read.maf(maf = maf.file, verbose = FALSE)
+
+```
+
+Now we make a summary plot of this data:
+```{r}
+plotmafSummary(vars)
+
+```
+
+## Oncoplots
+
+A very useful summary representation of this data can be obtained via so-called oncoplots, also known as waterfall plots.
+
+```{r}
+oncoplot(maf = vars, top = 10)
+
+```
+```{r}
+
+```
+
+# Part II
+Example analysis available on:
+https://bioboot.github.io/bimm143_W20//class-material/lecture18_part2_example/
+

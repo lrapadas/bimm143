@@ -111,4 +111,48 @@ ggraph(g, layout = 'auto') +
   geom_node_point(color="steelblue") +
   theme_graph()
 ```
+```{r}
+createNetworkFromIgraph(g,"myIgraph")
+```
+
+```{r}
+cb <- cluster_edge_betweenness(g)
+cb
+```
+```{r}
+plot(cb, y=g, vertex.label=NA,  vertex.size=3)
+
+```
+
+```{r}
+head( membership(cb) )
+
+```
+
+```{r}
+# Calculate and plot node degree of our network
+d <- degree(g)
+hist(d, breaks=30, col="lightblue", main ="Node Degree Distribution")
+
+```
+```{r}
+plot( degree_distribution(g), type="h" )
+
+```
+
+## Centrality Analysis
+
+```{r}
+pr <- page_rank(g)
+head(pr$vector)
+
+```
+
+```{r}
+# Make a size vector btwn 2 and 20 for node plotting size
+
+v.size <- BBmisc::normalize(pr$vector, range=c(2,20), method="range")
+plot(g, vertex.size=v.size, vertex.label=NA)
+
+```
 
