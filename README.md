@@ -18,5 +18,3 @@ This is my class repository for [BIMM 143](https://bioboot.github.io/bimm143_W20
 - Class 16: [Genome annotation and the interpretation of gene lists](url)
 - Class 17: [Biological network analysis](url)
 - Class 18: [Cancer genomics](url)
-
-###
