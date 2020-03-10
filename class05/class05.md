@@ -1,8 +1,6 @@
 Class 5: Data Visualization and Graphs in R
 ================
 
-# Class 5
-
 ## Data Visualization and graphs in R
 
 ``` r
