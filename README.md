@@ -14,7 +14,7 @@ This is my class repository for [BIMM 143](https://bioboot.github.io/bimm143_W20
 - [Class 12](https://github.com/lrapadas/bimm143/blob/master/class12/class12.md): Structural Bioinformatics (Part 1)
 - [Class 13](https://github.com/lrapadas/bimm143/blob/master/class13/class13.md): Bioinformatics in drug discovery and design
 - [Class 14](): Genome informatics and high throughput sequencing (Part 1)
-- [Class 15](): Transcriptomics and the analysis of RNA-Seq data
-- [Class 16](): Genome annotation and the interpretation of gene lists
+- [Class 15](https://github.com/lrapadas/bimm143/blob/master/class15/class15.md): Transcriptomics and the analysis of RNA-Seq data
+- [Class 16](https://github.com/lrapadas/bimm143/blob/master/class16/class16.md): Genome annotation and the interpretation of gene lists
 - [Class 17](): Biological network analysis
 - [Class 18](https://github.com/lrapadas/bimm143/blob/master/class18/class18.md): Cancer genomics
